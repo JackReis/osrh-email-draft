@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Vista Del Mar — Email Builder</title>
+<style>
+  :root{
+    --sea:#1f6f78; --sea-deep:#134e57;
+    --sand:#f5efe4; --ink:#2a3338; --muted:#6b7a80;
+    --line:#e2dccd; --rec:#2e8b6f; --card:#fffdf8;
+    --shadow:0 6px 24px rgba(19,78,87,.10);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#eaf2f1 0%, #f5efe4 60%); color:var(--ink); line-height:1.5;
+  }
+  header.top{
+    padding:22px 26px; background:var(--sea-deep); color:#fff;
+    box-shadow:var(--shadow);
+  }
+  header.top h1{margin:0; font-size:20px; letter-spacing:.2px}
+  header.top p{margin:4px 0 0; font-size:13px; opacity:.85}
+  .wrap{display:grid; grid-template-columns:minmax(340px,1fr) minmax(360px,1.05fr); gap:22px; padding:22px; max-width:1240px; margin:0 auto}
+  @media(max-width:880px){ .wrap{grid-template-columns:1fr} }
+
+  /* controls */
+  .controls{display:flex; flex-direction:column; gap:16px}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow)}
+  .panel h2{margin:0 0 4px; font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--sea)}
+  .panel .hint{font-size:12px; color:var(--muted); margin:0 0 10px}
+  .opt{display:flex; gap:10px; align-items:flex-start; padding:9px 10px; border:1px solid transparent; border-radius:10px; cursor:pointer; transition:background .12s,border-color .12s}
+  .opt:hover{background:#f3f7f6}
+  .opt input{margin-top:3px; accent-color:var(--sea)}
+  .opt.sel{background:#eef6f4; border-color:#cfe6df}
+  .opt .txt{font-size:14px}
+  .badge{display:inline-block; font-size:10px; font-weight:700; color:#fff; background:var(--rec); border-radius:20px; padding:1px 8px; margin-left:6px; vertical-align:middle; letter-spacing:.4px}
+  .perkpct{width:54px; padding:3px 6px; border:1px solid var(--line); border-radius:7px; font-size:13px; margin:0 4px}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px}
+  .row label{font-size:12px; color:var(--muted)}
+  .row input[type=text]{flex:1; min-width:120px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; font-size:13px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap}
+  .preset{font-size:12px; border:1px solid var(--sea); color:var(--sea); background:#fff; border-radius:20px; padding:5px 12px; cursor:pointer}
+  .preset:hover{background:var(--sea); color:#fff}
+
+  /* preview */
+  .previewcol{display:flex; flex-direction:column; gap:14px; position:sticky; top:16px; align-self:start}
+  .device{background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow)}
+  .mailmeta{padding:12px 18px; border-bottom:1px solid var(--line); font-size:12px; color:var(--muted); background:#fbfaf5}
+  .mailmeta .subj{font-size:15px; color:var(--ink); font-weight:600; margin-top:2px}
+  .mailmeta .pre{font-style:italic; margin-top:2px}
+  .email{padding:26px 26px 30px}
+  .email .hero{height:120px; border-radius:10px; margin-bottom:20px; background:linear-gradient(120deg,#2f7d86,#7bb0ad 60%,#d9c9a3); display:flex; align-items:flex-end; padding:12px 16px; color:#fff; font-family:Georgia,'Times New Roman',serif; font-size:18px; letter-spacing:.5px}
+  .email .body{font-family:Georgia,'Times New Roman',serif; font-size:15.5px; color:#33403f; line-height:1.62}
+  .email .body p{margin:0 0 15px}
+  .email ul{margin:0 0 15px; padding-left:20px}
+  .email li{margin-bottom:7px}
+  .perk{background:#eef6f4; border-left:3px solid var(--sea); padding:10px 14px; border-radius:6px; margin:0 0 15px; font-size:14.5px}
+  .cta{display:inline-block; background:var(--sea); color:#fff !important; text-decoration:none; padding:11px 22px; border-radius:8px; font-family:-apple-system,sans-serif; font-size:14px; font-weight:600; margin:4px 0 8px}
+  .sig{margin-top:6px}
+  .foot{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); font-size:11.5px; color:var(--muted); font-family:-apple-system,sans-serif; line-height:1.5}
+
+  /* output */
+  .out{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow)}
+  .out h2{margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--sea)}
+  .choices{font-size:12.5px; color:var(--ink); margin:0 0 12px}
+  .choices b{color:var(--sea-deep)}
+  .btns{display:flex; gap:8px; flex-wrap:wrap}
+  button.copy{border:0; background:var(--sea); color:#fff; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer}
+  button.copy.alt{background:#fff; color:var(--sea); border:1px solid var(--sea)}
+  button.copy:active{transform:translateY(1px)}
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:9px 16px; border-radius:20px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none}
+  .toast.show{opacity:1}
+  .note{font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.5}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>🌊 Vista Del Mar — Email Builder</h1>
+  <p>Pick your favorite wording for each part. The preview on the right updates as you choose. When it looks right, copy it and we'll load it into MailChimp.</p>
+</header>
+
+<div class="wrap">
+  <!-- ============ CONTROLS ============ -->
+  <div class="controls">
+    <div class="panel">
+      <h2>Quick presets</h2>
+      <p class="hint">Snap everything to a ready-made combination, then fine-tune.</p>
+      <div class="presets" id="presets"></div>
+      <div class="row">
+        <label>Preview name (the real email auto-fills each guest's first name):</label>
+        <input type="text" id="sampleName" value="Sarah" />
+      </div>
+    </div>
+    <div id="sections"></div>
+  </div>
+
+  <!-- ============ PREVIEW + OUTPUT ============ -->
+  <div class="previewcol">
+    <div class="device">
+      <div class="mailmeta">
+        From: John &amp; Karen · Vista Del Mar &lt;oursearanchhome@gmail.com&gt;
+        <div class="subj" id="pvSubject"></div>
+        <div class="pre" id="pvPre"></div>
+      </div>
+      <div class="email">
+        <div class="hero">Vista Del Mar</div>
+        <div class="body" id="pvBody"></div>
+      </div>
+    </div>
+
+    <div class="out">
+      <h2>Your choices</h2>
+      <div class="choices" id="choices"></div>
+      <div class="btns">
+        <button class="copy" onclick="copyHTML()">Copy email (HTML)</button>
+        <button class="copy alt" onclick="copyText()">Copy plain text</button>
+        <button class="copy alt" onclick="copyChoices()">Copy my picks for Jack</button>
+      </div>
+      <p class="note">Nothing is sent from this page — it just builds the wording. The final email goes out from MailChimp to past guests only, after you say go.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+/* ---------- Content model: each section = list of variants ---------- */
+const SECTIONS = [
+  { key:'subject', title:'Subject line', hint:'The first thing they see in their inbox.',
+    opts:[
+      {id:'s1', rec:true, label:'The bluff is calling you back to Vista Del Mar 🌊'},
+      {id:'s2', label:'{NAME}, your spot at the ocean’s edge is still here'},
+      {id:'s3', label:'Come back to Sea Ranch — summer & fall dates are opening up'},
+      {id:'s4', label:'We’ve been thinking of you — come back to Vista Del Mar'},
+    ]},
+  { key:'pre', title:'Preview text', hint:'The gray line shown after the subject in most inboxes.',
+    opts:[
+      {id:'p1', rec:true, label:'A quiet return to the Sonoma Coast — book direct with us.'},
+      {id:'p2', label:'Your favorite home on the bluff is ready when you are.'},
+      {id:'p3', label:'Summer and fall dates are opening up.'},
+    ]},
+  { key:'intro', title:'Opening', hint:'How the email begins, right after “Hi {NAME},”',
+    opts:[
+      {id:'i1', rec:true, label:'It’s John & Karen from Vista Del Mar — our home right at the ocean’s edge in Sea Ranch. We were thinking about our returning guests, and you came to mind.'},
+      {id:'i2', label:'It’s John & Karen from Vista Del Mar. It’s been a little while since your last stay on the bluff, and we’d love to welcome you back.'},
+      {id:'i3', label:'John & Karen here, from Vista Del Mar in Sea Ranch. Some of our favorite guests are the ones who come back — and we’re hoping you’ll be one of them.'},
+    ]},
+  { key:'pull', title:'The pull (sensory line)', hint:'A warm reminder of what the stay felt like.',
+    opts:[
+      {id:'u1', rec:true, label:'Whether it was the morning espresso on the deck, the sound of the surf below the bluff, or that first soak in the hot tub as the sun went down — the coast hasn’t changed, and there’s always a place for you here.'},
+      {id:'u2', label:'The deck, the hot tub, the sound of the waves against the bluff — it’s all still here, exactly as you remember it.'},
+      {id:'u0', label:'— leave this out —', skip:true},
+    ]},
+  { key:'reasons', title:'Reasons to come back', hint:'How much detail to give.',
+    opts:[
+      {id:'r1', rec:true, label:'Three reasons (seasonal + bluff + book direct)', kind:'reasons3'},
+      {id:'r2', label:'Two reasons (shorter)', kind:'reasons2'},
+      {id:'r3', label:'One line (shortest)', kind:'reasons1'},
+    ]},
+  { key:'perk', title:'Returning-guest perk', hint:'Optional thank-you for booking direct. Your call.',
+    opts:[
+      {id:'k0', rec:true, label:'— no perk —', skip:true},
+      {id:'k1', label:'Waive the cleaning fee on their next direct booking'},
+      {id:'k2', label:'Offer a late checkout (one more sunset)'},
+      {id:'k3', label:'Give a returning-guest discount of', pct:true},
+    ]},
+  { key:'cta', title:'Call to action', hint:'What you want them to do next.',
+    opts:[
+      {id:'c1', rec:true, label:'Book direct at oursearanchhome.com — no platform fees, and you deal with us the whole way.'},
+      {id:'c2', label:'Ready to come back? Just reply to this email and we’ll help you find dates.'},
+      {id:'c3', label:'Check availability and book direct at oursearanchhome.com.'},
+    ]},
+  { key:'close', title:'Closing line', hint:'The last nudge before the sign-off.',
+    opts:[
+      {id:'l1', rec:true, label:'If you’ve been meaning to plan another trip, just reply to this email — we’d love to help you find dates that work.'},
+      {id:'l2', label:'We’d love to see you back on the bluff. Just hit reply.'},
+      {id:'l0', label:'— leave this out —', skip:true},
+    ]},
+  { key:'signoff', title:'Sign-off', hint:'',
+    opts:[
+      {id:'g1', rec:true, label:'Warmly, John & Karen'},
+      {id:'g2', label:'With love from the coast, John & Karen'},
+      {id:'g3', label:'See you on the bluff, John & Karen'},
+    ]},
+];
+
+const BTN_TEXT = 'Book direct →';
+
+const REASONS = {
+  reasons3:['<strong>Summer and fall dates are opening up</strong> — the quiet shoulder season on the Sonoma Coast is honestly our favorite (fewer crowds, whales offshore, golden bluffs).',
+            '<strong>The bluff trail and beach access</strong> are steps from the door, same as you remember.',
+            '<strong>Book direct with us</strong> — no platform fees, and you deal with us the whole way through.'],
+  reasons2:['<strong>Summer and fall dates are opening up</strong> — the quiet shoulder season is our favorite time on the coast.',
+            '<strong>Book direct</strong> at oursearanchhome.com — no platform fees.'],
+  reasons1:null,
+};
+
+const PRESETS = {
+  'John’s pick (recommended)': {},                       // all defaults = recommended
+  'Warm & personal':   {intro:'i3', pull:'u1', signoff:'g2', subject:'s4'},
+  'Short & punchy':    {pull:'u0', reasons:'r3', close:'l0', subject:'s2', cta:'c3'},
+  'Seasonal urgency':  {subject:'s3', pre:'p3', reasons:'r1', cta:'c1'},
+};
+
+/* ---------- State ---------- */
+const state = {};
+const DEFAULTS = {};
+SECTIONS.forEach(s=>{ const rec=s.opts.find(o=>o.rec)||s.opts[0]; state[s.key]=rec.id; DEFAULTS[s.key]=rec.id; });
+state.pct = 10;
+state.name = 'Sarah';
+
+/* ---------- Build controls ---------- */
+function buildControls(){
+  const root = document.getElementById('sections'); root.innerHTML='';
+  SECTIONS.forEach(s=>{
+    const panel=document.createElement('div'); panel.className='panel';
+    let html=`<h2>${s.title}</h2>`; if(s.hint) html+=`<p class="hint">${s.hint}</p>`;
+    s.opts.forEach(o=>{
+      const sel = state[s.key]===o.id;
+      let lbl = o.label.replace('{NAME}', state.name||'there');
+      let pct = o.pct ? ` <input class="perkpct" type="number" min="1" max="50" value="${state.pct}" onclick="event.stopPropagation()" oninput="setPct(this.value)" />% off` : '';
+      html+=`<label class="opt ${sel?'sel':''}">
+        <input type="radio" name="${s.key}" ${sel?'checked':''} onchange="pick('${s.key}','${o.id}')" />
+        <span class="txt">${lbl}${pct}${o.rec?'<span class="badge">RECOMMENDED</span>':''}</span>
+      </label>`;
+    });
+    panel.innerHTML=html; root.appendChild(panel);
+  });
+  // presets
+  const pr=document.getElementById('presets'); pr.innerHTML='';
+  Object.keys(PRESETS).forEach(name=>{
+    const b=document.createElement('button'); b.className='preset'; b.textContent=name;
+    b.onclick=()=>applyPreset(name); pr.appendChild(b);
+  });
+}
+function pick(key,id){ state[key]=id; buildControls(); render(); }
+function setPct(v){ state.pct = Math.max(1,Math.min(50, parseInt(v||'10',10))); render(); }
+function applyPreset(name){
+  SECTIONS.forEach(s=> state[s.key]=DEFAULTS[s.key]);   // reset to recommended
+  Object.entries(PRESETS[name]).forEach(([k,v])=> state[k]=v);
+  buildControls(); render();
+}
+
+/* ---------- Helpers ---------- */
+function opt(key){ const s=SECTIONS.find(x=>x.key===key); return s.opts.find(o=>o.id===state[key]); }
+function perkText(){
+  const o=opt('perk'); if(o.skip) return null;
+  if(o.id==='k1') return 'As a returning guest, we’d love to waive your cleaning fee on your next direct booking — just mention this email.';
+  if(o.id==='k2') return 'Book direct and we’ll add a late checkout, so you can catch one more sunset before you go.';
+  if(o.id==='k3') return `As a thank-you, returning guests get ${state.pct}% off a direct booking — just ask when you reach out.`;
+  return null;
+}
+function nm(){ return (state.name||'there').trim() || 'there'; }
+
+/* ---------- Render preview ---------- */
+function render(){
+  const name=nm();
+  document.getElementById('pvSubject').textContent = opt('subject').label.replace('{NAME}', name);
+  document.getElementById('pvPre').textContent = opt('pre').label;
+
+  const intro=opt('intro').label, pull=opt('pull'), reasons=opt('reasons'),
+        cta=opt('cta').label, close=opt('close'), sign=opt('signoff').label, perk=perkText();
+
+  let b=`<p>Hi ${name},</p><p>${intro}</p>`;
+  if(!pull.skip) b+=`<p>${pull.label}</p>`;
+  const rk = reasons.kind;
+  if(rk==='reasons1'){ b+=`<p>Whenever you’re ready for another quiet stretch on the coast, your spot on the bluff is here — and booking direct at oursearanchhome.com is the easiest way back.</p>`; }
+  else { b+='<ul>'+REASONS[rk].map(x=>`<li>${x}</li>`).join('')+'</ul>'; }
+  if(perk) b+=`<div class="perk">${perk}</div>`;
+  b+=`<p>${cta}</p><p><a class="cta" href="https://oursearanchhome.com">${BTN_TEXT}</a></p>`;
+  if(!close.skip) b+=`<p>${close.label}</p>`;
+  const [sl,sn]= sign.includes(',')? [sign.split(',')[0]+',', sign.split(',').slice(1).join(',').trim()] : ['',sign];
+  b+=`<p class="sig">${sl?sl+'<br/>':''}<strong>${sn}</strong><br/>Vista Del Mar · Our Sea Ranch Home</p>`;
+  b+=`<div class="foot">You’re receiving this because you’ve stayed with us at Vista Del Mar.<br/>Our Sea Ranch Home · <a href="https://oursearanchhome.com">oursearanchhome.com</a> · <a href="#">Unsubscribe</a></div>`;
+  document.getElementById('pvBody').innerHTML=b;
+
+  // choices summary
+  const labels=SECTIONS.map(s=>{ const o=opt(s.key); let t=o.skip?'(none)':o.label.replace('{NAME}','[First name]'); if(o.id==='k3')t+=` (${state.pct}% off)`; return `<b>${s.title}:</b> ${t}`; });
+  document.getElementById('choices').innerHTML = labels.join('<br/>');
+}
+
+/* ---------- Export ---------- */
+function plainText(){
+  const name='*|FNAME|*';
+  const intro=opt('intro').label.replace('{NAME}',name), pull=opt('pull'), reasons=opt('reasons'),
+        cta=opt('cta').label, close=opt('close'), sign=opt('signoff').label, perk=perkText();
+  let lines=[`Hi ${name},`,'',intro,''];
+  if(!pull.skip){ lines.push(pull.label,''); }
+  if(reasons.kind==='reasons1'){ lines.push('Whenever you’re ready for another quiet stretch on the coast, your spot on the bluff is here — and booking direct at oursearanchhome.com is the easiest way back.',''); }
+  else { REASONS[reasons.kind].forEach(x=>lines.push('• '+x.replace(/<[^>]+>/g,''))); lines.push(''); }
+  if(perk){ lines.push(perk,''); }
+  lines.push(cta.replace(/<[^>]+>/g,''),'', 'Book direct: https://oursearanchhome.com','');
+  if(!close.skip){ lines.push(close.label,''); }
+  lines.push(sign,'Vista Del Mar · Our Sea Ranch Home','', '—','You’re receiving this because you’ve stayed with us at Vista Del Mar. Unsubscribe: *|UNSUB|*');
+  return lines.join('\n');
+}
+function htmlEmail(){
+  const name='*|FNAME|*';
+  const intro=opt('intro').label.replace('{NAME}',name), pull=opt('pull'), reasons=opt('reasons'),
+        cta=opt('cta').label, close=opt('close'), sign=opt('signoff').label, perk=perkText();
+  const [sl,sn]= sign.includes(',')? [sign.split(',')[0]+',', sign.split(',').slice(1).join(',').trim()] : ['',sign];
+  let b=`<p>Hi ${name},</p>\n<p>${intro}</p>`;
+  if(!pull.skip) b+=`\n<p>${pull.label}</p>`;
+  if(reasons.kind==='reasons1'){ b+=`\n<p>Whenever you’re ready for another quiet stretch on the coast, your spot on the bluff is here &mdash; and booking direct at oursearanchhome.com is the easiest way back.</p>`; }
+  else { b+='\n<ul>'+REASONS[reasons.kind].map(x=>`<li>${x}</li>`).join('')+'</ul>'; }
+  if(perk) b+=`\n<p style="background:#eef6f4;border-left:3px solid #1f6f78;padding:10px 14px;border-radius:6px;">${perk}</p>`;
+  b+=`\n<p>${cta}</p>\n<p><a href="https://oursearanchhome.com" style="display:inline-block;background:#1f6f78;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;">${BTN_TEXT}</a></p>`;
+  if(!close.skip) b+=`\n<p>${close.label}</p>`;
+  b+=`\n<p>${sl?sl+'<br/>':''}<strong>${sn}</strong><br/>Vista Del Mar &middot; Our Sea Ranch Home</p>`;
+  b+=`\n<hr/>\n<p style="font-size:12px;color:#6b7a80;">You&rsquo;re receiving this because you&rsquo;ve stayed with us at Vista Del Mar.<br/>Our Sea Ranch Home &middot; <a href="https://oursearanchhome.com">oursearanchhome.com</a> &middot; <a href="*|UNSUB|*">Unsubscribe</a></p>`;
+  return `<div style="font-family:Georgia,serif;font-size:16px;color:#33403f;line-height:1.6;max-width:600px;margin:0 auto;">\n${b}\n</div>`;
+}
+function choicesSummary(){
+  let out=['Vista Del Mar email — my picks:',''];
+  SECTIONS.forEach(s=>{ const o=opt(s.key); let t=o.skip?'(none)':o.label.replace('{NAME}','[First name]'); if(o.id==='k3')t+=` (${state.pct}% off)`; out.push(`• ${s.title}: ${t}`); });
+  return out.join('\n');
+}
+
+/* ---------- Clipboard ---------- */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1300); }
+function cp(txt,msg){ navigator.clipboard.writeText(txt).then(()=>toast(msg),()=>toast('Press ⌘C to copy')); }
+function copyHTML(){ cp(htmlEmail(),'HTML email copied!'); }
+function copyText(){ cp(plainText(),'Plain text copied!'); }
+function copyChoices(){ cp(choicesSummary(),'Your picks copied!'); }
+
+/* ---------- name input ---------- */
+document.getElementById('sampleName').addEventListener('input',e=>{ state.name=e.target.value; buildControls(); render(); });
+
+buildControls(); render();
+</script>
+</body>
+</html>
