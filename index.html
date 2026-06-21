@@ -38,6 +38,8 @@
   .opt .txt{font-size:14px}
   .badge{display:inline-block; font-size:10px; font-weight:700; color:#fff; background:var(--rec); border-radius:20px; padding:1px 8px; margin-left:6px; vertical-align:middle; letter-spacing:.4px}
   .perkpct{width:54px; padding:3px 6px; border:1px solid var(--line); border-radius:7px; font-size:13px; margin:0 4px}
+  .customsubj{display:block; width:100%; margin:2px 0 6px; padding:8px 10px; border:1px solid var(--sea); border-radius:8px; font-size:13.5px; font-family:inherit}
+  .customsubj:focus{outline:2px solid #cfe6df}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px}
   .row label{font-size:12px; color:var(--muted)}
   .row input[type=text]{flex:1; min-width:120px; padding:6px 9px; border:1px solid var(--line); border-radius:8px; font-size:13px}
@@ -129,12 +131,13 @@
 <script>
 /* ---------- Content model: each section = list of variants ---------- */
 const SECTIONS = [
-  { key:'subject', title:'Subject line', hint:'The first thing they see in their inbox.',
+  { key:'subject', title:'Subject line', hint:'The first thing they see in their inbox. Pick one — or write your own.',
     opts:[
       {id:'s1', rec:true, label:'The bluff is calling you back to Vista Del Mar 🌊'},
       {id:'s2', label:'{NAME}, your spot at the ocean’s edge is still here'},
       {id:'s3', label:'Come back to Sea Ranch — summer & fall dates are opening up'},
       {id:'s4', label:'We’ve been thinking of you — come back to Vista Del Mar'},
+      {id:'sx', custom:true, label:'✍️ Write your own subject'},
     ]},
   { key:'pre', title:'Preview text', hint:'The gray line shown after the subject in most inboxes.',
     opts:[
@@ -211,6 +214,7 @@ const DEFAULTS = {};
 SECTIONS.forEach(s=>{ const rec=s.opts.find(o=>o.rec)||s.opts[0]; state[s.key]=rec.id; DEFAULTS[s.key]=rec.id; });
 state.pct = 10;
 state.name = 'Sarah';
+state.customSubject = '';
 
 /* ---------- Build controls ---------- */
 function buildControls(){
@@ -226,6 +230,10 @@ function buildControls(){
         <input type="radio" name="${s.key}" ${sel?'checked':''} onchange="pick('${s.key}','${o.id}')" />
         <span class="txt">${lbl}${pct}${o.rec?'<span class="badge">RECOMMENDED</span>':''}</span>
       </label>`;
+      if(o.custom && sel){
+        const cv=(state.customSubject||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+        html+=`<input class="customsubj" type="text" value="${cv}" oninput="setCustomSubject(this.value)" placeholder="Type your subject — use *|FNAME|* for their first name" />`;
+      }
     });
     panel.innerHTML=html; root.appendChild(panel);
   });
@@ -246,6 +254,13 @@ function applyPreset(name){
 
 /* ---------- Helpers ---------- */
 function opt(key){ const s=SECTIONS.find(x=>x.key===key); return s.opts.find(o=>o.id===state[key]); }
+function subjectResolved(nameRepl){
+  const o=opt('subject');
+  let raw = o.custom ? (state.customSubject||'').trim() : o.label;
+  if(!raw) return '';
+  return raw.replace('{NAME}', nameRepl).replace(/\*\|FNAME\|\*/g, nameRepl);
+}
+function setCustomSubject(v){ state.customSubject = v; render(); }
 function perkText(){
   const o=opt('perk'); if(o.skip) return null;
   if(o.id==='k1') return 'As a returning guest, we’d love to waive your cleaning fee on your next direct booking — just mention this email.';
@@ -258,7 +273,7 @@ function nm(){ return (state.name||'there').trim() || 'there'; }
 /* ---------- Render preview ---------- */
 function render(){
   const name=nm();
-  document.getElementById('pvSubject').textContent = opt('subject').label.replace('{NAME}', name);
+  document.getElementById('pvSubject').textContent = subjectResolved(name) || '(your subject line here)';
   document.getElementById('pvPre').textContent = opt('pre').label;
 
   const intro=opt('intro').label, pull=opt('pull'), reasons=opt('reasons'),
@@ -278,7 +293,7 @@ function render(){
   document.getElementById('pvBody').innerHTML=b;
 
   // choices summary
-  const labels=SECTIONS.map(s=>{ const o=opt(s.key); let t=o.skip?'(none)':o.label.replace('{NAME}','[First name]'); if(o.id==='k3')t+=` (${state.pct}% off)`; return `<b>${s.title}:</b> ${t}`; });
+  const labels=SECTIONS.map(s=>{ const o=opt(s.key); let t; if(s.key==='subject'&&o.custom){ t=subjectResolved('[First name]')||'(write your own — not filled in)'; } else { t=o.skip?'(none)':o.label.replace('{NAME}','[First name]'); } if(o.id==='k3')t+=` (${state.pct}% off)`; return `<b>${s.title}:</b> ${t}`; });
   document.getElementById('choices').innerHTML = labels.join('<br/>');
 }
 
@@ -315,7 +330,7 @@ function htmlEmail(){
 }
 function choicesSummary(){
   let out=['Vista Del Mar email — my picks:',''];
-  SECTIONS.forEach(s=>{ const o=opt(s.key); let t=o.skip?'(none)':o.label.replace('{NAME}','[First name]'); if(o.id==='k3')t+=` (${state.pct}% off)`; out.push(`• ${s.title}: ${t}`); });
+  SECTIONS.forEach(s=>{ const o=opt(s.key); let t; if(s.key==='subject'&&o.custom){ t=subjectResolved('[First name]')||'(write your own — not filled in)'; } else { t=o.skip?'(none)':o.label.replace('{NAME}','[First name]'); } if(o.id==='k3')t+=` (${state.pct}% off)`; out.push(`• ${s.title}: ${t}`); });
   return out.join('\n');
 }
 
